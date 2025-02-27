@@ -75,6 +75,17 @@
 code {
     color: #c02d76;
 }
+
+body {
+    color: green;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
 .terminal {
     background-color: black;
     color: green;
@@ -85,6 +96,7 @@ code {
     overflow-y: auto;
     border-radius: 10px;
     border: 2px solid green;
+    align-self: center;
 }
 
 .terminal-header {
@@ -111,4 +123,3 @@ code {
         width: 100%;
         outline: none;
     }
-
