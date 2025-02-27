@@ -20,7 +20,7 @@ jobs:
           dotnet-version: '8.0.x'  # Stelle sicher, dass deine Version stimmt
 
       - name: Blazor WebAssembly veröffentlichen
-        run: dotnet publish Portfolio/Portfolio.csproj -c Release --output dist
+        run: dotnet publish Portfolio/Portfolio/Portfolio.csproj -c Release --output dist
 
       - name: Deployment zu gh-pages
         uses: JamesIves/github-pages-deploy-action@v4
