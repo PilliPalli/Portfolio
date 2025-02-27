@@ -1,7 +1,15 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
-
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
+<div class="terminal">
+    <div class="terminal-header">Terminal Bewerbung</div>
+    <div class="terminal-body">
+        @foreach (var line in output)
+        {
+            <div>@line</div>
+        }
+    </div>
+    <div class="terminal-input">
+        <span>$ </span>
+        <input @bind="input" @bind:event="oninput" @onkeydown="HandleKeyPress" autofocus />
+    </div>
+</div>
