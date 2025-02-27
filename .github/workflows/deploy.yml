@@ -1,0 +1,30 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Nur deployen, wenn auf main gepusht wird
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: .NET installieren
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'  # Stelle sicher, dass deine Version stimmt
+
+      - name: Blazor WebAssembly veröffentlichen
+        run: dotnet publish -c Release --output dist
+
+      - name: Deployment zu gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: dist/wwwroot  # Nur wwwroot deployen
