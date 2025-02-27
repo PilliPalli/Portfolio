@@ -75,3 +75,40 @@
 code {
     color: #c02d76;
 }
+.terminal {
+    background-color: black;
+    color: green;
+    font-family: monospace;
+    padding: 20px;
+    width: 600px;
+    height: 400px;
+    overflow-y: auto;
+    border-radius: 10px;
+    border: 2px solid green;
+}
+
+.terminal-header {
+    font-weight: bold;
+    padding-bottom: 5px;
+    border-bottom: 1px solid green;
+}
+
+.terminal-body {
+    height: 300px;
+    overflow-y: auto;
+}
+
+.terminal-input {
+    display: flex;
+    align-items: center;
+}
+
+    .terminal-input input {
+        background: none;
+        border: none;
+        color: green;
+        font-family: monospace;
+        width: 100%;
+        outline: none;
+    }
+
