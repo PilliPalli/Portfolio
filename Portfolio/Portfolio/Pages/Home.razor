@@ -1,15 +1,46 @@
 ﻿@page "/"
+@using Portfolio.Components
+@using Portfolio.Services
+@using Portfolio.Models
+@inject IJSRuntime JSRuntime
+@inject NavigationService NavigationService
+@inject CommandService CommandService
+@inject ThemeService ThemeService
 
 <div class="terminal">
-    <div class="terminal-header">Terminal Bewerbung</div>
-    <div class="terminal-body">
+    <div class="terminal-header">
+        <div>Terminal Portfolio - @NavigationService.GetSectionPath()</div>
+        <div class="terminal-controls">
+            <div class="terminal-control terminal-control-close"></div>
+            <div class="terminal-control terminal-control-minimize"></div>
+            <div class="terminal-control terminal-control-maximize"></div>
+        </div>
+    </div>
+    <div class="terminal-body" id="terminal-body">
         @foreach (var line in output)
         {
-            <div>@line</div>
+            if (line.IsHtml)
+            {
+                <div>@((MarkupString)line.Content)</div>
+            }
+            else
+            {
+                <div>@line.Content</div>
+            }
+        }
+        
+        @if (showContactForm)
+        {
+            <ContactForm />
+        }
+        
+        @if (showChallenge)
+        {
+            <GamificationChallenge OnPointsEarned="HandlePointsEarned" />
         }
     </div>
     <div class="terminal-input">
         <span>$ </span>
-        <input @bind="input" @bind:event="oninput" @onkeydown="HandleKeyPress" autofocus />
+        <input @bind="input" @bind:event="oninput" @onkeydown="HandleKeyPress" @ref="inputElement" autofocus />
     </div>
 </div>

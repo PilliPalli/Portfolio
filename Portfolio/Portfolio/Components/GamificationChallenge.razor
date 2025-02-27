@@ -1,0 +1,163 @@
+@inject IJSRuntime JSRuntime
+
+<div class="challenge-container">
+    <h3>Terminal Challenge: @CurrentChallenge.Title</h3>
+    
+    <div class="challenge-description">
+        <p>@CurrentChallenge.Description</p>
+    </div>
+    
+    @if (!isCompleted)
+    {
+        <div class="challenge-input">
+            <input @bind="userInput" @bind:event="oninput" @onkeydown="HandleKeyPress" placeholder="Enter your solution..." class="terminal-input-field" />
+        </div>
+        
+        @if (!string.IsNullOrEmpty(feedback))
+        {
+            <div class="challenge-feedback @(isCorrect ? "success" : "error")">
+                <p>@feedback</p>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="challenge-completed">
+            <p>Challenge completed! 🎉</p>
+            <p>You've earned @CurrentChallenge.Points points!</p>
+            <button class="terminal-button" @onclick="NextChallenge">Next Challenge</button>
+        </div>
+    }
+</div>
+
+@code {
+    private string userInput = "";
+    private bool isCompleted = false;
+    private bool isCorrect = false;
+    private string feedback = "";
+    private int currentChallengeIndex = 0;
+    
+    [Parameter]
+    public EventCallback<int> OnPointsEarned { get; set; }
+    
+    private List<ChallengeModel> Challenges = new()
+    {
+        new ChallengeModel
+        {
+            Title = "Hello World",
+            Description = "Write a command to print 'Hello, World!' to the terminal.",
+            Solution = "echo Hello, World!",
+            Points = 10
+        },
+        new ChallengeModel
+        {
+            Title = "Directory Navigation",
+            Description = "Write a command to navigate to the 'projects' section.",
+            Solution = "cd projects",
+            Points = 15
+        },
+        new ChallengeModel
+        {
+            Title = "ASCII Art",
+            Description = "Display the ASCII art of a cat.",
+            Solution = "ascii cat",
+            Points = 20
+        }
+    };
+    
+    private ChallengeModel CurrentChallenge => Challenges[currentChallengeIndex];
+    
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await CheckSolution();
+        }
+    }
+    
+    private async Task CheckSolution()
+    {
+        if (string.IsNullOrWhiteSpace(userInput))
+            return;
+            
+        if (userInput.Trim().Equals(CurrentChallenge.Solution, StringComparison.OrdinalIgnoreCase))
+        {
+            isCorrect = true;
+            feedback = "Correct solution!";
+            isCompleted = true;
+            
+            // Save progress to localStorage
+            await SaveProgressAsync();
+            
+            // Notify parent component about points earned
+            await OnPointsEarned.InvokeAsync(CurrentChallenge.Points);
+        }
+        else
+        {
+            isCorrect = false;
+            feedback = "That's not quite right. Try again!";
+        }
+    }
+    
+    private async Task NextChallenge()
+    {
+        if (currentChallengeIndex < Challenges.Count - 1)
+        {
+            currentChallengeIndex++;
+            ResetChallenge();
+        }
+        else
+        {
+            // All challenges completed
+            await JSRuntime.InvokeVoidAsync("alert", "Congratulations! You've completed all challenges!");
+        }
+    }
+    
+    private void ResetChallenge()
+    {
+        userInput = "";
+        isCompleted = false;
+        isCorrect = false;
+        feedback = "";
+    }
+    
+    private async Task SaveProgressAsync()
+    {
+        var progress = new
+        {
+            CompletedChallenges = currentChallengeIndex + 1,
+            TotalPoints = Challenges.Take(currentChallengeIndex + 1).Sum(c => c.Points)
+        };
+        
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "challengeProgress", 
+            System.Text.Json.JsonSerializer.Serialize(progress));
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        // Load progress from localStorage
+        var progressJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "challengeProgress");
+        
+        if (!string.IsNullOrEmpty(progressJson))
+        {
+            try
+            {
+                var progress = System.Text.Json.JsonSerializer.Deserialize<dynamic>(progressJson);
+                currentChallengeIndex = Math.Min(progress.CompletedChallenges, Challenges.Count - 1);
+            }
+            catch
+            {
+                // If there's an error, just start from the beginning
+                currentChallengeIndex = 0;
+            }
+        }
+    }
+    
+    public class ChallengeModel
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string Solution { get; set; }
+        public int Points { get; set; }
+    }
+}
